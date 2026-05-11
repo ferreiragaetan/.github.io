@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gaëtan Ferreira — Vidéaste & Télépilote Drone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:   #080808;
+    --dark:    #111111;
+    --card:    #161616;
+    --border:  #222222;
+    --muted:   #3a3a3a;
+    --gray:    #888888;
+    --light:   #c8c8c0;
+    --white:   #f2efe8;
+    --accent:  #e8793a;
+    --cyan:    #4ab8d4;
+    --blue:    #2a7fff;
+    --blue-dim: rgba(42,127,255,0.12);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--light);
+    font-family: var(--font-body);
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(232,121,58,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.25s ease, height 0.25s ease, border-color 0.2s ease;
+  }
+  body:hover .cursor { opacity: 1; }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--cyan); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 72px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 40%, rgba(42,127,255,0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 40% at 85% 80%, rgba(74,184,212,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(232,121,58,0.05) 0%, transparent 50%);
+  }
+
+  .hero-lines {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .hero-lines::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 160px;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--border) 30%, var(--border) 70%, transparent);
+    opacity: 0.6;
+  }
+
+  .hero-lines::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 320px;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--muted) 20%, transparent 60%);
+    opacity: 0.3;
+  }
+
+  .hero-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+  }
+
+  .hero-title .line2 {
+    display: block;
+    color: transparent;
+    -webkit-text-stroke: 1px #2a7fff44;
+    padding-left: 0.15em;
+  }
+
+  .hero-title .accent { color: var(--accent); -webkit-text-stroke: 0; }
+
+  .hero-sub {
+    max-width: 480px;
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.8;
+    margin-top: 32px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-top: 48px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.8s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--accent);
+    color: var(--black);
+    padding: 14px 28px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .btn-primary:hover { background: #f08a4a; transform: translateY(-2px); }
+
+  .btn-secondary {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .btn-secondary::after {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--gray);
+    transition: width 0.3s, background 0.2s;
+  }
+
+  .btn-secondary:hover { color: var(--white); }
+  .btn-secondary:hover::after { width: 48px; background: var(--white); }
+
+  .hero-scroll {
+    position: absolute;
+    right: 48px;
+    bottom: 72px;
+    writing-mode: vertical-rl;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+  }
+
+  .hero-scroll::before {
+    content: '';
+    display: block;
+    width: 1px; height: 48px;
+    background: var(--muted);
+  }
+
+  /* SECTIONS */
+  section { padding: 120px 48px; }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 24px; height: 1px;
+    background: var(--cyan);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(42px, 6vw, 80px);
+    line-height: 0.95;
+    letter-spacing: 0.03em;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+
+  /* SHOWREEL */
+  .showreel {
+    border-top: 1px solid var(--border);
+    padding: 120px 48px;
+  }
+
+  .showreel-wrapper {
+    margin-top: 48px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+  }
+
+  .showreel-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .showreel-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .showreel-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: linear-gradient(135deg, #0d0d0d 0%, #0a0f1a 50%, #0d0d0d 100%);
+  }
+
+  .showreel-icon {
+    width: 72px;
+    height: 72px;
+    border: 1px solid var(--cyan);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--cyan);
+    padding-left: 4px;
+    transition: background 0.3s, transform 0.3s;
+  }
+
+  .showreel-frame:hover .showreel-icon {
+    background: rgba(74,184,212,0.1);
+    transform: scale(1.08);
+  }
+
+  .showreel-soon {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ABOUT */
+  .about { border-top: 1px solid var(--border); }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-top: 64px;
+    align-items: start;
+  }
+
+  .about-text p {
+    font-size: 15px;
+    color: var(--gray);
+    line-height: 1.9;
+    margin-bottom: 20px;
+  }
+
+  .about-text p strong {
+    color: var(--light);
+    font-weight: 400;
+  }
+
+  .about-quote {
+    font-family: var(--font-display);
+    font-size: 28px;
+    line-height: 1.2;
+    color: var(--white);
+    border-left: 2px solid var(--cyan);
+    padding-left: 24px;
+    margin: 40px 0;
+    letter-spacing: 0.03em;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    padding: 32px 24px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-number {
+    font-family: var(--font-display);
+    font-size: 48px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-number span { color: var(--cyan); }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  /* SERVICES */
+  .services { background: var(--dark); border-top: 1px solid var(--border); }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 64px;
+  }
+
+  .service-card {
+    background: var(--card);
+    padding: 40px 32px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--cyan);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-card:hover { border-color: var(--muted); }
+
+  .service-icon {
+    font-size: 28px;
+    margin-bottom: 24px;
+    display: block;
+    opacity: 0.6;
+  }
+
+  .service-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+
+  .service-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 16px;
+    line-height: 1;
+  }
+
+  .service-desc {
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.8;
+  }
+
+  .service-card.featured {
+    background: var(--black);
+    border-color: var(--cyan);
+    grid-row: span 1;
+  }
+
+  /* PORTFOLIO */
+  .portfolio { border-top: 1px solid var(--border); }
+
+  .portfolio-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 64px;
+  }
+
+  .portfolio-note {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    max-width: 280px;
+    line-height: 1.7;
+    text-align: right;
+  }
+
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 2px;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 28px;
+    transition: border-color 0.3s;
+  }
+
+  .project-card:hover { border-color: var(--muted); }
+
+  .project-card.small { aspect-ratio: 4/3; }
+
+  .project-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    transition: opacity 0.4s;
+  }
+
+  .project-card:hover .project-bg { opacity: 0.25; }
+
+  .bg-auto {
+    background: linear-gradient(135deg, #1a1a1a 0%, #e8793a22 50%, #111 100%);
+  }
+
+  .bg-drone {
+    background: linear-gradient(135deg, #0a0f1a 0%, #2a7fff30 60%, #0a0a0a 100%);
+  }
+
+  .bg-travel {
+    background: linear-gradient(135deg, #0a0f18 0%, #4ab8d428 40%, #0d1118 100%);
+  }
+
+  .bg-reel {
+    background: linear-gradient(135deg, #0a0f1a 0%, #2a7fff18 50%, #0a0a0a 100%);
+  }
+
+  .project-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .project-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    position: relative;
+    z-index: 1;
+    line-height: 1.1;
+  }
+
+  .project-status {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+  }
+
+  .project-wip { color: var(--cyan); border-color: rgba(74,184,212,0.3); }
+
+  .project-card.featured-project {
+    grid-row: span 2;
+  }
+
+  .featured-project .project-name { font-size: 36px; }
+
+  .portfolio-empty {
+    border: 1px solid var(--border);
+    padding: 80px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--card);
+  }
+
+  .portfolio-empty-text {
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.8;
+    max-width: 360px;
+  }
+
+  /* CONTACT */
+  .contact { background: var(--dark); border-top: 1px solid var(--border); }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-top: 64px;
+    align-items: start;
+  }
+
+  .contact-text p {
+    font-size: 15px;
+    color: var(--gray);
+    line-height: 1.9;
+    margin-bottom: 16px;
+  }
+
+  .contact-links {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: var(--gray);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .contact-link:hover { color: var(--white); }
+
+  .contact-link-icon {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .contact-link:hover .contact-link-icon {
+    border-color: var(--cyan);
+    background: rgba(74,184,212,0.08);
+  }
+
+  .contact-form { display: flex; flex-direction: column; gap: 16px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+  .form-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .form-input, .form-textarea {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--light);
+    padding: 14px 16px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+
+  .form-input:focus, .form-textarea:focus { border-color: var(--cyan); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--muted); }
+
+  .form-textarea { height: 120px; }
+
+  .form-submit {
+    background: var(--accent);
+    color: var(--black);
+    border: none;
+    padding: 16px 32px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: none;
+    transition: background 0.2s, transform 0.2s;
+    align-self: flex-start;
+  }
+
+  .form-submit:hover { background: #f08a4a; transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  .footer-copy {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    section { padding: 80px 24px; }
+    .hero { padding: 0 24px 56px; }
+    .hero-scroll { display: none; }
+    .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 48px; }
+    .services-grid { grid-template-columns: 1fr; }
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .portfolio-intro { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .portfolio-note { text-align: left; }
+    .project-card.featured-project { grid-row: span 1; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">G<span>F</span></a>
+  <ul class="nav-links">
+    <li><a href="#showreel">Showreel</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+
+  <p class="hero-tag">Vidéaste · Monteur · Télépilote Drone</p>
+
+  <h1 class="hero-title">
+    Gaëtan<br>
+    <span class="line2">Ferr<span class="accent">ei</span>ra</span>
+  </h1>
+
+  <p class="hero-sub">
+    Je transforme des images en récits visuels — avec du rythme, de l'émotion et une approche cinématique.
+  </p>
+
+  <div class="hero-cta">
+    <a href="#portfolio" class="btn-primary">Voir le portfolio →</a>
+    <a href="#contact" class="btn-secondary">Me contacter</a>
+  </div>
+
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- SHOWREEL -->
+<section class="showreel" id="showreel">
+  <p class="section-label reveal">Showreel</p>
+  <h2 class="section-title reveal">Le travail<br>parle</h2>
+  <div class="showreel-wrapper reveal">
+    <div class="showreel-frame">
+      <div class="showreel-placeholder">
+        <div class="showreel-icon">▶</div>
+        <p class="showreel-soon">Showreel 2025 — bientôt disponible</p>
+      </div>
+      <!-- Quand ton YouTube est prêt, remplace le bloc ci-dessus par :
+      <iframe
+        src="https://www.youtube.com/embed/TON_ID_VIDEO?autoplay=0&rel=0&modestbranding=1"
+        title="Showreel Gaëtan Ferreira"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      -->
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <p class="section-label reveal">À propos</p>
+  <h2 class="section-title reveal">L'image<br>avant tout</h2>
+
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>
+        Je m'appelle <strong>Gaëtan Ferreira</strong>, vidéaste et télépilote drone basé en France.
+        Je construis progressivement mon activité autour d'une conviction simple :
+        <strong>les images seules ne suffisent pas.</strong>
+      </p>
+      <p>
+        Ce qui fait la différence, c'est le montage — le rythme, les respirations, la musique,
+        la couleur. C'est ce qui transforme une séquence en sensation, un plan en émotion.
+      </p>
+      <p>
+        Junior assumé, je travaille avec <strong>sérieux, passion et envie d'apprendre</strong>.
+        Mon positionnement n'est pas de prétendre tout maîtriser, mais d'apporter un regard,
+        une sensibilité et un engagement total à chaque projet.
+      </p>
+
+      <blockquote class="about-quote">
+        Aujourd'hui tout le monde fait des images — le montage leur apporte ce qu'il leur manque.
+      </blockquote>
+    </div>
+
+    <div class="reveal">
+      <div class="about-stats">
+        <div class="stat-card">
+          <p class="stat-number">4<span>K</span></p>
+          <p class="stat-label">Résolution max</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-number">∞</p>
+          <p class="stat-label">Motivation</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-number">5<span>+</span></p>
+          <p class="stat-label">Types de contenu</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-number">1<span>re</span></p>
+          <p class="stat-label">Priorité : votre vision</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <p class="section-label reveal">Services</p>
+  <h2 class="section-title reveal">Ce que<br>je propose</h2>
+
+  <div class="services-grid">
+
+    <div class="service-card featured reveal">
+      <span class="service-icon">🎬</span>
+      <p class="service-num">01</p>
+      <h3 class="service-name">Montage vidéo</h3>
+      <p class="service-desc">
+        Rushes bruts → contenu finalisé. Rythme, color grading, sound design, exports optimisés.
+        Du court format au documentaire, chaque montage raconte quelque chose.
+      </p>
+    </div>
+
+    <div class="service-card reveal">
+      <span class="service-icon">📱</span>
+      <p class="service-num">02</p>
+      <h3 class="service-name">Reels & formats courts</h3>
+      <p class="service-desc">
+        Contenus pensés pour Instagram, TikTok, YouTube Shorts. Dynamiques, accrocheurs,
+        mais jamais sans intention artistique.
+      </p>
+    </div>
+
+    <div class="service-card reveal">
+      <span class="service-icon">🎞</span>
+      <p class="service-num">03</p>
+      <h3 class="service-name">Teaser & vidéo promo</h3>
+      <p class="service-desc">
+        Présenter un événement, un lieu, une marque, un produit — avec impact.
+        Ambiance travaillée, narration claire, rendu premium.
+      </p>
+    </div>
+
+    <div class="service-card reveal">
+      <span class="service-icon">🚁</span>
+      <p class="service-num">04</p>
+      <h3 class="service-name">Drone & prises aériennes</h3>
+      <p class="service-desc">
+        Pilote en cours de certification (CATS). Images aériennes cinématiques,
+        plans immersifs FPV, travellings fluides. La perspective qui change tout.
+      </p>
+    </div>
+
+    <div class="service-card reveal">
+      <span class="service-icon">🌍</span>
+      <p class="service-num">05</p>
+      <h3 class="service-name">Storytelling voyage & auto</h3>
+      <p class="service-desc">
+        Mini-documentaires immersifs, edits automobiles émotionnels.
+        Raconter une sensation, pas juste montrer un lieu ou une voiture.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section class="portfolio" id="portfolio">
+  <div class="portfolio-intro">
+    <div>
+      <p class="section-label reveal">Portfolio</p>
+      <h2 class="section-title reveal">Projets<br>récents</h2>
+    </div>
+    <p class="portfolio-note reveal">
+      Activité en construction — les projets arrivent progressivement.
+      Contactez-moi pour voir des travaux récents.
+    </p>
+  </div>
+
+  <div class="portfolio-empty reveal">
+    <p class="portfolio-empty-text">Les projets arrivent bientôt — contactez-moi pour voir des travaux récents.</p>
+    <a href="#contact" class="btn-secondary" style="margin-top: 24px; display: inline-flex;">Me contacter</a>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <p class="section-label reveal">Contact</p>
+  <h2 class="section-title reveal">Travaillons<br>ensemble</h2>
+
+  <div class="contact-grid">
+    <div class="contact-text reveal">
+      <p>
+        Vous avez un projet vidéo, un événement à capturer, un contenu à produire ?
+        Je suis disponible pour discuter de vos besoins — sans engagement.
+      </p>
+      <p>
+        Que vous soyez une marque locale, un artiste, un passionné d'automobile
+        ou simplement quelqu'un avec une belle histoire à raconter :
+        <strong>parlons-en.</strong>
+      </p>
+
+      <div class="contact-links">
+        <a href="mailto:contact@gaetanferreira.fr" class="contact-link">
+          <span class="contact-link-icon">✉</span>
+          contact@gaetanferreira.fr
+        </a>
+        <a href="https://instagram.com" class="contact-link" target="_blank">
+          <span class="contact-link-icon">◈</span>
+          Instagram
+        </a>
+        <a href="https://linkedin.com" class="contact-link" target="_blank">
+          <span class="contact-link-icon">in</span>
+          LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="contact-form">
+        <div class="form-group">
+          <label class="form-label">Votre nom</label>
+          <input type="text" class="form-input" placeholder="Prénom Nom">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" placeholder="vous@exemple.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Votre projet</label>
+          <textarea class="form-textarea" placeholder="Décrivez votre projet en quelques lignes..."></textarea>
+        </div>
+        <button class="form-submit">Envoyer le message</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">GF</span>
+  <span class="footer-copy">© 2025 Gaëtan Ferreira — Vidéaste & Télépilote Drone</span>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('a, button, .service-card, .project-card').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '14px';
+      cursor.style.height = '14px';
+      ring.style.width = '52px';
+      ring.style.height = '52px';
+      ring.style.borderColor = 'rgba(232,121,58,0.6)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '8px';
+      cursor.style.height = '8px';
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.borderColor = 'rgba(232,121,58,0.4)';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
